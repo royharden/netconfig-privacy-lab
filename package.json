@@ -1,0 +1,46 @@
+{
+  "name": "netconfig-privacy-lab",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Measurement lab for planted-identifier leakage and analysis-utility preservation on synthetic IOS-style IPv4 configs. Built in Dirty Mode: nothing has been installed, run or measured.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "ledger-validate": "tsx scripts/ledger-validate.ts fixtures/smoke",
+    "eval": "tsx scripts/eval.ts",
+    "gen-dev": "tsx scripts/gen-dev.ts",
+    "freeze-check": "tsx scripts/freeze-check.ts",
+    "preregister": "tsx scripts/preregister.ts",
+    "verify-recordings": "tsx scripts/verify-recordings.ts",
+    "render-readme": "tsx scripts/render-readme.ts",
+    "demo": "tsx scripts/demo.ts"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}

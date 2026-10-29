@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:netconfig-privacy-lab:schema:labels-v1",
+  "title": "Case labels (labels-v1)",
+  "description": "labels.json (a label file, PLAN.md row 42c): benign labelled spans (over-redaction denominator) and non-identifier free-text tokens of descriptions, remarks, banners, comments and neighbour descriptions (free-text retention denominator). Every span is in one line: ordinal = 1-based line number; start/end = 0-based start, EXCLUSIVE end, UTF-16 code units of the line text without its terminator (= bytes for ASCII); text = the exact substring (checked by scripts/ledger-validate.ts). Mirrors src/core/labels.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "caseId", "benignSpans", "freeTextTokens"],
+  "properties": {
+    "schema": { "const": "labels-v1" },
+    "caseId": { "$ref": "#/$defs/id" },
+    "benignSpans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "fileId", "ordinal", "start", "end", "text", "note"],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "fileId": { "$ref": "#/$defs/id" },
+          "ordinal": { "$ref": "#/$defs/ordinal" },
+          "start": { "$ref": "#/$defs/start" },
+          "end": { "$ref": "#/$defs/end" },
+          "text": { "type": "string", "minLength": 1 },
+          "note": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+            "description": "The trap or constant the span exercises, e.g. benign-substring, mask-like-address, html-in-description, port-constant, acl-number-constant, default-route-zero."
+          }
+        }
+      }
+    },
+    "freeTextTokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fileId", "ordinal", "start", "end", "text"],
+        "properties": {
+          "fileId": { "$ref": "#/$defs/id" },
+          "ordinal": { "$ref": "#/$defs/ordinal" },
+          "start": { "$ref": "#/$defs/start" },
+          "end": { "$ref": "#/$defs/end" },
+          "text": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+    "ordinal": { "type": "integer", "minimum": 1, "maximum": 1000 },
+    "start": { "type": "integer", "minimum": 0, "maximum": 65535 },
+    "end": { "type": "integer", "minimum": 1, "maximum": 65536 }
+  }
+}

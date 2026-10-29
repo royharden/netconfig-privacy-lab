@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "title": "Label-blind receipt", "type": "object", "additionalProperties": false,
+  "required": ["schema", "manifestSha256", "files", "status"],
+  "properties": {
+    "schema": {"const":"preflight-v1"}, "status":{"const":"pass"}, "manifestSha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "files":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["caseId","role","sha256"],"properties":{"caseId":{"type":["string","null"]},"role":{"enum":["config","case","labels","ledger","expected","provenance","readme"]},"sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}}
+  }
+}

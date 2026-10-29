@@ -1,0 +1,2 @@
+# Keep fixture bytes (and their ledger spans / hashes) identical on every OS.
+* text=auto eol=lf

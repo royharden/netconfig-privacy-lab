@@ -1,0 +1,40 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files (none are needed; .env.example documents that)
+.env
+.env.*
+!.env.example
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Note: results/, recordings/ and evaluation/ are NOT ignored. Generated result files and hash receipts are committed later.
+# Agent-only material (chat exports, registries, .thinking, plans) lives in the outer shell, never in this repo.
+
+# Local credentials, key material and generated archives
+.creds/
+ArchiveManager-creds.txt
+*.pem
+*.key
+*.p12
+*.pfx
+*.zip
+*.7z
+*.tar
+*.tar.gz
+fixtures/eval-key.txt
+
+# Protected and excluded local evaluation material
+fixtures/
+gold/
+.env*

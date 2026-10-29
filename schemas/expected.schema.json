@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:netconfig-privacy-lab:schema:expected-v1",
+  "title": "Author expected answers (expected-v1)",
+  "description": "expected.json (PLAN.md row 38): one per semantic-positive held-out or practice case, written only by the independent author against docs/SEMANTICS.md. Exactly 5 hand-derived flows (row 19) and the five-finding table (findings compared as multisets). aclDecision.entryOrdinal: 1-based deciding ACL entry ordinal, 0 = implicit deny. Finding ordinal: permit-ip-any-any -> ACL entry ordinal of the any-any entry; duplicate-acl-entry -> ACL entry ordinal of the second (duplicate) entry; duplicate-interface-address -> interface source ordinal of each non-first copy (copies ordered by node order in case.json, then source ordinal); unresolved-acl-reference -> interface source ordinal of the interface with the unresolved access-group; default-snmp-community -> line ordinal of the community line. Interface hops use case.json interface ids. Mirrors src/core/expected.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "caseId", "flows", "findings"],
+  "properties": {
+    "schema": { "const": "expected-v1" },
+    "caseId": { "$ref": "#/$defs/id" },
+    "flows": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/flow" }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flowId", "disposition", "nodeIds", "interfaceHops", "aclDecision"],
+      "properties": {
+        "flowId": { "$ref": "#/$defs/id" },
+        "disposition": {
+          "enum": [
+            "delivered",
+            "delivered-to-subnet",
+            "deny-in",
+            "deny-out",
+            "no-route",
+            "loop",
+            "exits-network",
+            "unsupported"
+          ]
+        },
+        "nodeIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } },
+        "interfaceHops": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["nodeId", "ingress", "egress"],
+            "properties": {
+              "nodeId": { "$ref": "#/$defs/id" },
+              "ingress": { "$ref": "#/$defs/id" },
+              "egress": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] }
+            }
+          }
+        },
+        "aclDecision": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["nodeId", "aclId", "entryOrdinal"],
+              "properties": {
+                "nodeId": { "$ref": "#/$defs/id" },
+                "aclId": { "$ref": "#/$defs/id" },
+                "entryOrdinal": { "type": "integer", "minimum": 0, "maximum": 32 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "nodeId", "ordinal"],
+      "properties": {
+        "rule": {
+          "enum": [
+            "permit-ip-any-any",
+            "duplicate-acl-entry",
+            "duplicate-interface-address",
+            "unresolved-acl-reference",
+            "default-snmp-community"
+          ]
+        },
+        "nodeId": { "$ref": "#/$defs/id" },
+        "aclId": { "$ref": "#/$defs/id" },
+        "direction": { "enum": ["in", "out"] },
+        "ordinal": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "rule": { "enum": ["permit-ip-any-any", "duplicate-acl-entry"] } } },
+          "then": { "required": ["aclId"] }
+        },
+        {
+          "if": { "properties": { "rule": { "const": "unresolved-acl-reference" } } },
+          "then": { "required": ["direction"] }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Preregistration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "candidateCommit", "candidateTag", "lockfileSha256", "corpusManifestSha256", "vaultManifestSha256", "poolIndexSha256", "seeds", "flowIds", "probePairs", "poolIds", "netconanArgs", "normaliserVersion"],
+  "properties": {
+    "schema": {"const": "preregister-v1"},
+    "candidateCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$", "maxLength": 40},
+    "candidateTag": {"type": "string", "pattern": "^(?!.*\\.\\.)(?!.*\\.lock$)[A-Za-z0-9][A-Za-z0-9._-]{0,127}(?<!\\.)$", "maxLength": 128},
+    "lockfileSha256": {"$ref": "#/$defs/hash"},
+    "corpusManifestSha256": {"$ref": "#/$defs/hash"},
+    "vaultManifestSha256": {"$ref": "#/$defs/hash"},
+    "poolIndexSha256": {"$ref": "#/$defs/hash"},
+    "seeds": {"type": "object", "additionalProperties": false, "required": ["bootstrap", "probe"], "properties": {"bootstrap": {"$ref": "#/$defs/seed"}, "probe": {"$ref": "#/$defs/seed"}}},
+    "flowIds": {"type": "array", "minItems": 640, "maxItems": 640, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}/[a-z0-9][a-z0-9-]{0,63}$", "maxLength": 129}},
+    "poolIds": {"type": "array", "minItems": 196, "maxItems": 1176, "uniqueItems": true, "items": {"type": "string", "pattern": "^p[0-9]{4}$", "maxLength": 5}},
+    "probePairs": {"type": "array", "minItems": 24, "maxItems": 24, "uniqueItems": true, "items": {"type": "object", "additionalProperties": false, "required": ["caseId", "pairs"], "properties": {"caseId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$", "maxLength": 64}, "pairs": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/address"}}}}}},
+    "netconanArgs": {"type": "object", "additionalProperties": false, "required": ["netconan-minimal", "netconan-operator", "netconan-ledger-informed"], "properties": {"netconan-minimal": {"allOf": [{"$ref": "#/$defs/args"}, {"not": {"contains": {"enum": ["-w", "-n"]}}}]}, "netconan-operator": {"$ref": "#/$defs/informedArgs"}, "netconan-ledger-informed": {"$ref": "#/$defs/informedArgs"}}},
+    "normaliserVersion": {"const": "s43-normalise-v1"},
+    "recordingExpectationsSha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$", "maxLength": 64},
+    "seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "args": {"type": "array", "minItems": 3, "maxItems": 256, "items": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^(?!-d(?:=|$))[^\\u0000-\\u001f\\u007f<>]+$"}, "allOf": [{"contains": {"const": "-a"}, "minContains": 1, "maxContains": 1}, {"contains": {"const": "-p"}, "minContains": 1, "maxContains": 1}, {"contains": {"const": "s43-synthetic-salt-v1"}, "minContains": 1, "maxContains": 1}]},
+    "informedArgs": {"allOf": [{"$ref": "#/$defs/args"}, {"contains": {"const": "-w"}, "minContains": 1, "maxContains": 1}, {"contains": {"const": "-n"}, "minContains": 1, "maxContains": 1}]},
+    "address": {"type": "string", "maxLength": 15, "pattern": "^(?!0\\.0\\.0\\.0$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?|0)\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?|0)$"}
+  }
+}

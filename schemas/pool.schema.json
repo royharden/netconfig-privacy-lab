@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pool-v1",
+  "title": "Probe B decoy index (not a vault manifest)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "entries"],
+  "properties": {
+    "schema": { "const": "pool-v1" },
+    "entries": {
+      "type": "array", "minItems": 1176, "maxItems": 1176,
+      "description": "parsePoolIndex additionally enforces 49 unique cases per family/device-count cell and globally unique paths.",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["caseId", "family", "deviceCount", "seed", "generatorCommit", "files"],
+        "properties": {
+          "caseId": { "type": "string", "pattern": "^p[0-9]{4}$" },
+          "family": { "enum": ["ring", "hub-and-spoke", "campus-tree", "dual-isp-edge"] },
+          "deviceCount": { "type": "integer", "minimum": 3, "maximum": 8 },
+          "seed": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "generatorCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+          "files": {
+            "type": "array", "minItems": 4, "maxItems": 9,
+            "description": "Exactly deviceCount configs and one case.json; path must belong to caseId and match role.",
+            "items": {
+              "type": "object", "additionalProperties": false, "required": ["path", "role", "sha256"],
+              "properties": {
+                "path": { "type": "string", "pattern": "^p[0-9]{4}/(?:n[0-9]{2}\\.cfg|case\\.json)$" },
+                "role": { "enum": ["config", "case"] },
+                "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

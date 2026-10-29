@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "recording-v1",
+  "title": "RecordingBundleV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","tool","toolVersion","imageDigest","packageFileHashes","pybatfishVersion","versionOutput","versionSha256","helpOutput","helpSha256","args","queries","effectiveOptionsJson","salt","keyId","keyScope","inputFiles","outputFiles","rawAnswers","rawAnswersSha256","normaliserVersion","normalisedRows","exitStatus","elapsedMs","operatorCallsign","date","caseId","arm","split","candidateCommit","recorderSourceSha256"],
+  "properties": {
+    "schema": { "const": "recording-v1" },
+    "tool": { "enum": ["netconan","batfish"] },
+    "toolVersion": { "$ref": "#/$defs/text" },
+    "imageDigest": { "oneOf": [{"type":"null"},{"type":"string","pattern":"^sha256:[0-9a-f]{64}$"}] },
+    "packageFileHashes": { "type":"array","maxItems":4096,"items":{"type":"object","additionalProperties":false,"required":["path","sha256"],"properties":{"path":{"type":"string","minLength":1,"maxLength":4096},"sha256":{"$ref":"#/$defs/hash"}}} },
+    "pybatfishVersion": { "oneOf":[{"type":"null"},{"type":"string","minLength":1,"maxLength":4096}] },
+    "versionOutput": { "$ref":"#/$defs/text" }, "versionSha256": { "$ref":"#/$defs/hash" },
+    "helpOutput": { "$ref":"#/$defs/text" }, "helpSha256": { "$ref":"#/$defs/hash" },
+    "args": {"type":"array","maxItems":1024,"items":{"type":"string","maxLength":4096}},
+    "queries": {"type":"array","maxItems":1024,"items":{"type":"object","additionalProperties":false,"required":["query","parametersJson"],"properties":{"query":{"type":"string","minLength":1,"maxLength":4096},"parametersJson":{"$ref":"#/$defs/jsonText"}}}},
+    "effectiveOptionsJson": {"$ref":"#/$defs/jsonText"},
+    "salt": {"$ref":"#/$defs/text"}, "keyId":{"$ref":"#/$defs/id"}, "keyScope":{"const":"synthetic-evaluation"},
+    "inputFiles":{"$ref":"#/$defs/files"}, "outputFiles":{"$ref":"#/$defs/files"},
+    "rawAnswers":{"$ref":"#/$defs/jsonText"}, "rawAnswersSha256":{"$ref":"#/$defs/hash"},
+    "normaliserVersion":{"const":"s43-normalise-v1"},
+    "normalisedRows":{"type":"array","maxItems":100000,"items":{"type":"object","additionalProperties":false,"required":["query","rowId","disposition","answer"],"properties":{"query":{"type":"string","minLength":1,"maxLength":4096},"rowId":{"$ref":"#/$defs/id"},"disposition":{"enum":[null,"delivered","delivered-to-subnet","deny-in","deny-out","no-route","loop","exits-network","unsupported"]},"answer":{"$ref":"#/$defs/jsonText"}}}},
+    "exitStatus":{"type":"integer","minimum":0,"maximum":255}, "elapsedMs":{"type":"integer","minimum":0,"maximum":9007199254740991},
+    "operatorCallsign":{"$ref":"#/$defs/text"},
+    "date":{"type":"string","maxLength":4096,"format":"date-time","pattern":"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?Z$"},
+    "caseId":{"$ref":"#/$defs/id"},
+    "arm":{"enum":["identity","naive-mask","random-consistent","lab-scrub","lab-drop","netconan-minimal","netconan-operator","netconan-ledger-informed","lab-scrub@key2"]},
+    "split":{"enum":["dev","practice","heldout"]},
+    "candidateCommit":{"type":"string","pattern":"^[0-9a-f]{40}$","maxLength":4096},
+    "recorderSourceSha256":{"$ref":"#/$defs/hash"}
+  },
+  "allOf":[
+    {"if":{"properties":{"tool":{"const":"netconan"}}},"then":{"properties":{"arm":{"enum":["netconan-minimal","netconan-operator","netconan-ledger-informed"]},"imageDigest":{"type":"null"},"pybatfishVersion":{"type":"null"},"packageFileHashes":{"minItems":1}}}},
+    {"if":{"properties":{"tool":{"const":"batfish"}}},"then":{"properties":{"imageDigest":{"type":"string"},"pybatfishVersion":{"type":"string"}}}}
+  ],
+  "$defs": {
+    "hash":{"type":"string","pattern":"^[0-9a-f]{64}$","maxLength":4096},
+    "id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]{0,63}$","maxLength":4096},
+    "text":{"type":"string","maxLength":1048576},
+    "jsonText":{"type":"string","maxLength":16777216,"contentMediaType":"application/json"},
+    "files":{"type":"array","minItems":1,"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["fileId","name","text","sha256"],"properties":{"fileId":{"$ref":"#/$defs/id"},"name":{"type":"string","minLength":1,"maxLength":255,"pattern":"^[^/\\\\\\u0000-\\u001f\\u007f]+$","not":{"enum":[".",".."]}},"text":{"type":"string","maxLength":65536},"sha256":{"$ref":"#/$defs/hash"}}}}
+  }
+}

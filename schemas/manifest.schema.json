@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:netconfig-privacy-lab:schema:manifest-v1",
+  "title": "Vault / corpus manifest (manifest-v1)",
+  "description": "MANIFEST.json (PLAN.md row 42a/b/d). Every file in the vault except MANIFEST.json itself is listed exactly once: case files under cases[].files, everything else (PROVENANCE.md, README.md) under vaultFiles. Case paths are opaque (h01/n01.cfg, h01/case.json); caseIds are opaque synthetic IDs, never hostnames. Label files are identified by role (labels, ledger, expected); the label-blind preflight only hashes them. seed/generatorCommit are used only for generated dev cases. gold/heldout/MANIFEST.sha256 = SHA-256 of this file. Checked beyond this schema by src/core/manifest.ts (parseManifest): path uniqueness across the whole manifest, config count = deviceCount, exactly one case/labels/ledger file per case, expected present exactly for semantic-positive practice and held-out cases.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "vaultFiles", "cases"],
+  "properties": {
+    "schema": { "const": "manifest-v1" },
+    "vaultFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "role", "sha256"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*\\.md$", "maxLength": 128 },
+          "role": { "enum": ["provenance", "readme"] },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "split", "family", "deviceCount", "stratum", "files"],
+        "properties": {
+          "caseId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+          "split": { "enum": ["dev", "practice", "heldout"] },
+          "family": { "enum": ["ring", "hub-and-spoke", "campus-tree", "dual-isp-edge"] },
+          "deviceCount": { "type": "integer", "minimum": 3, "maximum": 8 },
+          "stratum": { "enum": ["semantic-positive", "unsupported"] },
+          "seed": { "type": "integer", "minimum": 0 },
+          "generatorCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+          "files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "role", "sha256"],
+              "properties": {
+                "path": { "type": "string", "pattern": "^[a-z0-9]+/[a-z0-9]+\\.(?:cfg|json)$", "maxLength": 128 },
+                "role": { "enum": ["config", "case", "labels", "ledger", "expected"] },
+                "sha256": { "$ref": "#/$defs/sha256" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

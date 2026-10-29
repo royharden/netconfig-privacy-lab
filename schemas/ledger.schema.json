@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:netconfig-privacy-lab:schema:ledger-v1",
+  "title": "Planted-identifier ledger (ledger-v1)",
+  "description": "One ledger.json per case (a label file). Positions: location 'line' -> ordinal is the 1-based line number and start/end index into that line's text without its terminator; location 'name' -> ordinal is 0 and start/end index into the file's display name (case.json files[].name). Spans are 0-based start, EXCLUSIVE end, in UTF-16 code units (equal to byte offsets for ASCII). text is the exact substring at the span (checked by scripts/ledger-validate.ts). Not expressible here, checked by ledger-validate: <=8 distinct occurrence texts per entity; an exact span belongs to one entity only; spans of different entities may nest but never partially overlap. Mirrors src/core/ledger.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "caseId", "entities"],
+  "properties": {
+    "schema": { "const": "ledger-v1" },
+    "caseId": { "$ref": "#/$defs/id" },
+    "entities": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/entity" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entityId", "class", "value", "occurrences"],
+      "properties": {
+        "entityId": { "$ref": "#/$defs/id" },
+        "class": {
+          "enum": [
+            "hostname",
+            "domain",
+            "ipv4",
+            "asn",
+            "username",
+            "secret",
+            "community",
+            "person",
+            "org",
+            "acl-name",
+            "email",
+            "serial",
+            "mac",
+            "filename"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "description": "Canonical value; occurrences may be variants of it (e.g. MAC 00:a1:b2:c3:d4:e5 written as 00a1.b2c3.d4e5)."
+        },
+        "occurrences": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/occurrence" }
+        }
+      }
+    },
+    "occurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileId", "location", "ordinal", "start", "end", "text", "variant"],
+      "properties": {
+        "fileId": { "$ref": "#/$defs/id" },
+        "location": { "enum": ["line", "name"] },
+        "ordinal": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "start": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "end": { "type": "integer", "minimum": 1, "maximum": 65536 },
+        "text": { "type": "string", "minLength": 1 },
+        "variant": { "enum": ["exact", "case", "embedded", "split", "dotted", "dashed"] }
+      },
+      "if": { "properties": { "location": { "const": "name" } } },
+      "then": { "properties": { "ordinal": { "const": 0 } } },
+      "else": { "properties": { "ordinal": { "minimum": 1 } } }
+    }
+  }
+}
